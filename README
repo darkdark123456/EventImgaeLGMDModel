@@ -1,0 +1,8 @@
+平台 :ARM64 JETSON NANO B01
+QT版本  5.15
+CMAKE版本  3.12+
+opencv最低版本 4.0+
+eigen最低版本  3.2+
+qtcharts
+rs
+
