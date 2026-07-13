@@ -1,10 +1,214 @@
-平台:ARM64 JETSON NANO B01
-OS:  ubuntu20.4刷机镜像 
-INTEL D435I 深度相机
-QT版本  5.15
-CMAKE版本  3.12+
-opencv最低版本 4.0+
-eigen最低版本  3.2+
-qtcharts
-rs
-其他必要依赖
+<div align="center">
+
+
+# 🎯 Event-RGB Fusion Collision Detection
+
+### 事件图像与 RGB 图像融合的碰撞检测系统
+
+基于事件相机（Event Camera）与 RGB 深度相机数据融合，实现低延迟、高动态范围的实时碰撞检测
+
+![Platform](https://img.shields.io/badge/Platform-Jetson%20Nano%20B01-76B900?style=flat-square&logo=nvidia)
+![OS](https://img.shields.io/badge/OS-Ubuntu%2020.04-E95420?style=flat-square&logo=ubuntu)
+![Qt](https://img.shields.io/badge/Qt-5.15-41CD52?style=flat-square&logo=qt)
+![CMake](https://img.shields.io/badge/CMake-3.12+-064F8C?style=flat-square&logo=cmake)
+![OpenCV](https://img.shields.io/badge/OpenCV-4.0+-5C3EE8?style=flat-square&logo=opencv)
+![License](https://img.shields.io/badge/License-MIT-success.svg?style=flat-square)
+
+</div>
+
+---
+
+## 📖 项目简介
+
+> 本项目通过融合**事件相机（Event Camera）**的高时间分辨率、高动态范围数据，与 **Intel RealSense D435i** 深度相机的 RGB-D 数据，实现对运动物体的实时碰撞检测。
+>
+> 事件相机能够以微秒级延迟捕捉像素亮度变化，有效弥补传统 RGB 相机在高速运动、强光/暗光场景下的运动模糊与曝光局限；结合 RGB 图像提供的语义与深度信息，实现更鲁棒的碰撞预警能力。
+>
+> 系统部署于 **NVIDIA Jetson Nano B01** 平台，面向嵌入式实时场景（如机器人避障、无人机避障等）设计。
+
+---
+
+## 🖥 运行环境
+
+| 类别           | 要求                                   |
+| -------------- | -------------------------------------- |
+| 🔧 硬件平台     | ARM64 架构，Jetson Nano B01            |
+| 💿 操作系统     | Ubuntu 20.04（官方刷机镜像）           |
+| 📷 深度相机     | Intel RealSense D435i                  |
+| 🖼 事件相机     | Event Camera（DVS / DAVIS 等兼容设备） |
+| 🎨 GUI 框架     | Qt 5.15                                |
+| ⚙️ 构建工具     | CMake 3.12 及以上                      |
+| 📐 计算机视觉库 | OpenCV 4.0 及以上                      |
+| 🔢 线性代数库   | Eigen 3.2 及以上                       |
+| 📊 图表组件     | Qt Charts                              |
+| 📡 相机 SDK     | librealsense（rs）                     |
+| 📦 其他依赖     | 详见 [依赖安装](#-依赖安装)            |
+
+---
+
+## 🏗 系统架构
+
+```mermaid
+graph TD
+
+EventCam[事件相机数据流] --> Sync[时间戳对齐/同步]
+RGBCam[D435i RGB-D数据流] --> Sync
+
+Sync --> Fusion[事件-RGB图像融合]
+
+Fusion --> Detect[目标检测与运动估计]
+Detect --> Depth[深度信息关联]
+Depth --> Collision[碰撞检测算法]
+
+Collision --> Alert[碰撞预警输出]
+Collision --> UI[Qt界面可视化/QtCharts曲线展示]
+```
+
+---
+
+## ⚙️ 核心处理流程
+
+```mermaid
+sequenceDiagram
+
+participant EventSensor
+participant D435i
+participant FusionModule
+participant DetectionModule
+participant CollisionEngine
+participant QtUI
+
+EventSensor->>FusionModule: 事件流(异步像素变化)
+D435i->>FusionModule: RGB帧+深度帧
+
+FusionModule->>DetectionModule: 融合后的运动/边缘信息
+DetectionModule->>CollisionEngine: 目标位置+速度估计
+CollisionEngine->>QtUI: 碰撞风险等级+可视化数据
+QtUI-->>QtUI: QtCharts实时曲线渲染
+```
+
+---
+
+## 📂 项目结构（建议）
+
+```text
+EventRGBFusionCollision/
+│
+├── src/
+│   ├── event_camera/        # 事件相机驱动与数据解析
+│   ├── realsense/           # D435i 采集与深度处理（rs封装）
+│   ├── fusion/               # 事件图像与RGB图像融合算法
+│   ├── detection/            # 目标检测与运动估计
+│   ├── collision/            # 碰撞检测核心算法
+│   └── ui/                   # Qt界面与QtCharts可视化
+│
+├── include/                  # 头文件
+├── third_party/               # 第三方依赖（如需源码编译）
+├── CMakeLists.txt
+└── README.md
+```
+
+---
+
+## 📦 依赖安装
+
+### 1. 基础工具链
+
+```bash
+sudo apt update
+sudo apt install -y build-essential cmake git pkg-config
+```
+
+### 2. OpenCV（≥ 4.0）
+
+```bash
+sudo apt install -y libopencv-dev
+```
+
+> Jetson 平台建议参考 NVIDIA 官方 JetPack 文档，安装带 CUDA 加速的 OpenCV 版本以获得更好性能。
+
+### 3. Eigen（≥ 3.2）
+
+```bash
+sudo apt install -y libeigen3-dev
+```
+
+### 4. Qt 5.15 与 Qt Charts
+
+```bash
+sudo apt install -y qt5-default qtcharts5-dev
+```
+
+> 若 apt 源中无对应版本，可通过 [Qt 官方在线安装器](https://www.qt.io/download) 手动安装 5.15 版本及 Qt Charts 组件。
+
+### 5. Intel RealSense SDK（librealsense / rs）
+
+```bash
+sudo apt install -y librealsense2-dkms librealsense2-utils librealsense2-dev
+```
+
+> Jetson 平台建议参考 [librealsense 官方 ARM 编译指南](https://github.com/IntelRealSense/librealsense) 从源码编译，以确保与 Jetson 内核兼容。
+
+### 6. 事件相机 SDK
+
+根据实际使用的事件相机型号（如 DVS、DAVIS、Prophesee 等），安装对应厂商提供的驱动与 SDK。
+
+---
+
+## 🚀 编译与运行
+
+```bash
+# 克隆项目
+git clone https://github.com/yourname/EventRGBFusionCollision.git
+cd EventRGBFusionCollision
+
+# 创建构建目录
+mkdir build && cd build
+
+# 配置与编译
+cmake ..
+make -j$(nproc)
+
+# 运行
+./EventRGBFusionCollision
+```
+
+---
+
+## ✨ 功能特性
+
+✅ 事件相机与 RGB-D 相机时间戳同步与数据融合
+
+✅ 高动态范围场景下的鲁棒运动检测
+
+✅ 结合深度信息的精确碰撞距离估计
+
+✅ 基于 Qt Charts 的实时数据可视化
+
+✅ 面向 Jetson Nano 嵌入式平台优化，支持实时推理
+
+---
+
+## 🗺 Roadmap
+
+- [x] 事件相机数据接入
+- [x] D435i RGB-D 数据接入
+- [x] 事件-RGB 融合基础算法
+- [ ] 碰撞检测算法优化（多目标场景）
+- [ ] GPU/CUDA 加速融合流程
+- [ ] 可视化界面完善（QtCharts 多曲线联动）
+
+---
+
+## 📜 License
+
+本项目采用 [MIT License](./LICENSE) 开源协议。
+
+---
+
+<div align="center">
+
+
+如果这个项目对你有帮助，欢迎 ⭐ Star 支持！
+
+</div>
