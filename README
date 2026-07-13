@@ -14,6 +14,8 @@
 ![OpenCV](https://img.shields.io/badge/OpenCV-4.0+-5C3EE8?style=flat-square&logo=opencv)
 ![License](https://img.shields.io/badge/License-MIT-success.svg?style=flat-square)
 
+</div>
+
 ---
 
 ## 📖 项目简介
@@ -87,24 +89,6 @@ QtUI-->>QtUI: QtCharts实时曲线渲染
 
 ---
 
-## 📂 项目结构（建议）
-
-```text
-EventRGBFusionCollision/
-│
-├── src/
-│   ├── event_camera/        # 事件相机驱动与数据解析
-│   ├── realsense/           # D435i 采集与深度处理（rs封装）
-│   ├── fusion/               # 事件图像与RGB图像融合算法
-│   ├── detection/            # 目标检测与运动估计
-│   ├── collision/            # 碰撞检测核心算法
-│   └── ui/                   # Qt界面与QtCharts可视化
-│
-├── include/                  # 头文件
-├── third_party/               # 第三方依赖（如需源码编译）
-├── CMakeLists.txt
-└── README.md
-```
 
 ---
 
